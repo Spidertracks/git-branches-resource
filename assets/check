@@ -20,10 +20,12 @@ uri=$(jq -r '.source.uri // ""' < $payload)
 git_config_payload=$(jq -r '.source.git_config // []' < $payload)
 
 previous_branches="$(jq -r '.version.branches // ""' < $payload)"
+previous_tags="$(jq -r '.version.tags // ""' < $payload)"
 
 configure_git_global "${git_config_payload}"
 
 current_branches="$(git ls-remote -h "$uri" | awk '{print $NF}' | sed 's/refs\/heads\///' | sort)"
+current_tags=$(git ls-remote --tags -h "$uri" | egrep 'tags/([0-9]+\.[0-9]+\.[0-9]+)$'| awk '{print $NF}'| sed 's/refs\/tags\///' | sort)
 
 set_sub() {
   jq -nr '($a | split("\n")) - ($b | split("\n")) | join("\n")' \
@@ -33,22 +35,33 @@ set_sub() {
 
 echo "previous: $previous_branches"
 echo "current:  $current_branches"
+echo "previous tags: $previous_tags"
+echo "current:  $current_tags"
 
-if [ "$current_branches" = "$previous_branches" ]; then
+if [ "$current_branches" = "$previous_branches" ] && [ "$current_tags" = "$previous_tags" ]; then
   echo '[]' >&3
 else
   removed="$(set_sub "$previous_branches" "$current_branches")"
   added="$(set_sub "$current_branches" "$previous_branches")"
+  
+  removed_tags="$(set_sub "$previous_tags" "$current_tags")"
+  added_tags="$(set_sub "$current_tags" "$previous_tags")"
 
   jq -n '[
     {
       removed: $removed,
       added: $added,
-      branches: $branches
+      branches: $branches,
+      removed_tags: $removed_tags,
+      added_tags: $added_tags,
+      tags: $tags
     }
   ]' \
     --arg removed "$removed" \
     --arg added "$added" \
     --arg branches "$current_branches" \
+    --arg removed_tags "$removed_tags" \
+    --arg added_tags "$added_tags" \
+    --arg tags "$tags" \
     >&3
 fi

@@ -23,4 +23,8 @@ jq -r '.version.branches // ""' < $payload > branches
 jq -r '.version.added // ""' < $payload > added
 jq -r '.version.removed // ""' < $payload > removed
 
+jq -r '.version.tags // ""' < $payload > tags
+jq -r '.version.added_tags // ""' < $payload > added_tags
+jq -r '.version.removed_tags // ""' < $payload > removed_tags
+
 jq '{version}' < $payload >&3
