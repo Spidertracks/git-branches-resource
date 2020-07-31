@@ -1,0 +1,26 @@
+resources:
+  - name: git-branches-resource
+    type: git
+    source:
+      branch: master
+      uri: git@github.com:Spidertracks/git-branches-resource.git
+      private_key: ((github_private_rsa_key))
+
+  - name: stl-git-branches-resource
+    type: docker-image
+    source:
+      repository: 586597079952.dkr.ecr.us-west-2.amazonaws.com/git-branches-resource
+      aws_access_key_id: ((aws-access-key-id))
+      aws_secret_access_key: ((aws-secret-access-key))
+
+
+jobs:
+  - name: publish
+    public: true
+    serial: true
+    plan:
+      - get: git-branches-resource
+        trigger: true
+      - put: stl-git-branches-resource
+        params:
+          build: git-branches-resource/
