@@ -62,6 +62,6 @@ else
     --arg branches "$current_branches" \
     --arg removed_tags "$removed_tags" \
     --arg added_tags "$added_tags" \
-    --arg tags "$tags" \
+    --arg tags "$current_tags" \
     >&3
 fi
