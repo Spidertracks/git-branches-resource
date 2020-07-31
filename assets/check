@@ -25,7 +25,7 @@ previous_tags="$(jq -r '.version.tags // ""' < $payload)"
 configure_git_global "${git_config_payload}"
 
 current_branches="$(git ls-remote -h "$uri" | awk '{print $NF}' | sed 's/refs\/heads\///' | sort)"
-current_tags=$(git ls-remote --tags -h "$uri" | egrep 'tags/([0-9]+\.[0-9]+\.[0-9]+)$'| awk '{print $NF}'| sed 's/refs\/tags\///' | sort)
+current_tags=$(git ls-remote --tags -h "$uri" | egrep 'tags/([0-9]+\.[0-9]+\.[0-9]+)$'| awk '{print $NF}'| sed 's/refs\///' | sort)
 
 set_sub() {
   jq -nr '($a | split("\n")) - ($b | split("\n")) | join("\n")' \
